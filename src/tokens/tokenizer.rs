@@ -4,7 +4,7 @@ use crate::SyntaxOption;
 use crate::CompilerOptions;
 use crate::tokens::constants::WORDBREAK;
 use crate::error::{CompilerError, ErrorType};
-use super::Token;
+use super::{Token, Expression, CodeLocation};
 use std::collections::HashMap;
 
 #[derive(Clone, Debug)]
@@ -26,7 +26,8 @@ impl Tokenizer {
   pub fn tokenize(code: &str) -> Result<Vec<Token>, CompilerError> {
     let options = CompilerOptions {
       syntax: SyntaxOptions {
-        assignment: vec![vec!["set".into(), ":name".into(), "to".into(), ":value".into()]]
+        assignment: vec![vec!["set".into(), ":name".into(), "to".into(), ":value".into()]],
+        null: "null".into()
       }
     };
 
@@ -63,6 +64,9 @@ impl Tokenizer {
     return Ok(tokens);
   }
 
+  /// Attempts to parse the next expression found in the code.
+  /// Returns a Token if successful.
+  /// Otherwise it returns a CompilerError.
   pub fn parse_expression(&mut self) -> Result<Token, CompilerError> {
     let keyword = self.try_match(&self.start_keywords.clone());
 
@@ -74,6 +78,16 @@ impl Tokenizer {
       };
     }
 
+    let snapshot = self.snapshot();
+
+    let null = self.try_match(&vec![self.options.syntax.null.clone()]);
+    if null.is_some() {
+      return Ok(Token {
+        expression: Expression::Null,
+        loc: CodeLocation::from(snapshot),
+      });
+    }
+
     return Err(CompilerError::new(
       ErrorType::InternalError,
       "Not implemented".to_string(),
@@ -82,6 +96,9 @@ impl Tokenizer {
     ))
   }
 
+  /// Look at the next word and attempt to match it against the list of keywords.
+  /// If a match is found, returns the keyword.
+  /// Otherwise, returns None.
   pub fn try_match(&mut self, keywords: &Vec<String>) -> Option<String> {
     let snapshot = self.snapshot();
 
@@ -112,9 +129,12 @@ impl Tokenizer {
       c = self.next();
     }
 
+    self.restore_snapshot(&snapshot);
     None
   }
 
+  /// Returns the next character, or None if no characters remain.
+  /// Also increments the x and y position accordingly.
   pub fn next(&mut self) -> Option<char> {
     if self.y != 0 {
       self.pos += 1;
@@ -134,6 +154,7 @@ impl Tokenizer {
     };
   }
 
+  /// Returns the next character not included in a given set, or None if no "allowed" characters remain.
   pub fn next_except(&mut self, except: &str) -> Option<char> {
     let mut next = self.next();
     while next.is_some() && except.contains(next.unwrap()) {
@@ -163,6 +184,7 @@ impl Tokenizer {
     Ok(())
   }
 
+  /// Returns a snapshot of the current state of the tokenizer.
   pub fn snapshot(&mut self) -> Snapshot {
     Snapshot {
       pos: self.pos,
@@ -171,6 +193,7 @@ impl Tokenizer {
     }
   }
 
+  /// Restores the state of the tokenizer to a given point.
   pub fn restore_snapshot(&mut self, snapshot: &Snapshot) {
     self.pos = snapshot.pos;
     self.x = snapshot.x;
@@ -178,6 +201,7 @@ impl Tokenizer {
   }
 }
 
+#[derive(Clone, Debug)]
 pub struct Snapshot {
   pub pos: usize,
   pub x: usize,
