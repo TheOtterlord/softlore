@@ -1,4 +1,8 @@
 pub mod tokenizer;
+pub mod constants;
+pub mod assignment;
+
+use assignment::Assignment;
 
 #[derive(Debug)]
 pub struct CodeLocation {
@@ -14,5 +18,6 @@ pub struct Token {
 
 #[derive(Debug)]
 pub enum Expression {
+  Assignment(Assignment),
   Null,
 }
