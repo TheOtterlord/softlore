@@ -1,0 +1,6 @@
+{
+  "syntax": {
+    "assignment": [["set", ":name", "to", ":value"]],
+    "null": "null"
+  }
+}

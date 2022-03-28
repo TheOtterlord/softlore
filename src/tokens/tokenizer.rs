@@ -19,7 +19,7 @@ pub struct Tokenizer {
   keyword_to_builder: HashMap<String, Builder>,
   pub pos: usize,
   pub x: usize,
-  pub y: u16
+  pub y: usize
 }
 
 impl Tokenizer {
@@ -91,8 +91,8 @@ impl Tokenizer {
     return Err(CompilerError::new(
       ErrorType::InternalError,
       "Not implemented".to_string(),
+      self.y,
       self.x,
-      self.y
     ))
   }
 
@@ -205,5 +205,5 @@ impl Tokenizer {
 pub struct Snapshot {
   pub pos: usize,
   pub x: usize,
-  pub y: u16
+  pub y: usize
 }

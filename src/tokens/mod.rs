@@ -7,7 +7,7 @@ use assignment::Assignment;
 
 #[derive(Debug)]
 pub struct CodeLocation {
-  pub line: u16,
+  pub line: usize,
   pub column: usize,
 }
 

@@ -12,7 +12,7 @@ pub fn parse_assignment(t: &mut Tokenizer, keyword: String) -> Result<Token, Com
   return Err(CompilerError::new(
     ErrorType::InternalError,
     "Assignment not implemented yet".to_string(),
-    t.x,
     t.y,
+    t.x,
   ));
 }
